@@ -1,0 +1,688 @@
+\documentclass[11pt,a4paper]{article}
+
+% ----------------------------------------------------------------------
+% Packages
+% ----------------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+\setlist{itemsep=0.2em, topsep=0.3em}
+
+\newcommand{\Veff}{V_{\text{eff}}}
+
+\title{Derivation of the Schwarzschild Equations of Motion\\(Hamiltonian Formalism)}
+\author{Nugie Saputra}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document derives the equations of motion for geodesics of test particles and photons in a static, spherically symmetric spacetime using Hamiltonian mechanics. It ends with a system of first-order ordinary differential equations that can be integrated numerically with the fourth-order Runge--Kutta method. The implementation is in the \texttt{schwarzschild} Python package of this repository.
+\end{abstract}
+
+\tableofcontents
+
+% ======================================================================
+\section{The covariant metric \texorpdfstring{($g_{\mu\nu}$)}{(g\_mu nu)}}
+\label{sec:metric}
+
+For a static spacetime with spherical symmetry the line element $ds^2$ is
+\begin{equation*}
+ds^2 = -f(r)\,dt^2 + \frac{dr^2}{f(r)} + r^2 \left( d\theta^2 + \sin^2\theta\,d\phi^2 \right) \tag{1}\label{eq:1}
+\end{equation*}
+
+From equation~\eqref{eq:1} the covariant metric $g_{\mu\nu}$ is diagonal with non-zero components
+\begin{align*}
+    g_{tt} &= -f(r) \tag{2a}\label{eq:2a} \\
+    g_{rr} &= \frac{1}{f(r)} \tag{2b} \\
+    g_{\theta\theta} &= r^2 \tag{2c} \\
+    g_{\phi\phi} &= r^2 \sin^2\theta \tag{2d}
+\end{align*}
+
+% ======================================================================
+\section{The contravariant metric \texorpdfstring{($g^{\mu\nu}$)}{(g\^{}mu nu)}}
+
+The contravariant metric $g^{\mu\nu}$ is the inverse of $g_{\mu\nu}$. Since $g_{\mu\nu}$ is diagonal, each contravariant component is simply the reciprocal of the corresponding covariant component in equation~(2):
+\begin{align*}
+    g^{tt} &= \frac{1}{g_{tt}} = -\frac{1}{f(r)} \tag{3a}\label{eq:3a} \\
+    g^{rr} &= \frac{1}{g_{rr}} = f(r) \tag{3b} \\
+    g^{\theta\theta} &= \frac{1}{g_{\theta\theta}} = \frac{1}{r^2} \tag{3c} \\
+    g^{\phi\phi} &= \frac{1}{g_{\phi\phi}} = \frac{1}{r^2 \sin^2\theta} \tag{3d}
+\end{align*}
+
+% ======================================================================
+\section{The Hamiltonian}
+
+In General Relativity the Hamiltonian of a particle (or photon) is
+\begin{equation*}
+H = \frac{1}{2} g^{\mu\nu} p_\mu p_\nu \tag{4}\label{eq:4}
+\end{equation*}
+
+Substituting the contravariant components from equation~(3) into equation~\eqref{eq:4} gives
+\begin{equation*}
+H = \frac{1}{2} \left[ -\frac{p_t^2}{f(r)} + f(r) p_r^2 + \frac{p_\theta^2}{r^2} + \frac{p_\phi^2}{r^2 \sin^2\theta} \right] \tag{5}\label{eq:5}
+\end{equation*}
+
+% ======================================================================
+\section{Hamilton's equations and conserved quantities}
+
+The momenta conjugate to the coordinates obey the canonical equation, with $\lambda$ an affine parameter:
+\begin{equation*}
+\dot{p}_\mu = -\frac{\partial H}{\partial x^\mu} \tag{6}\label{eq:6}
+\end{equation*}
+
+The Hamiltonian~\eqref{eq:5} does not depend explicitly on the time coordinate $t$ or on the azimuthal angle $\phi$ (cyclic coordinates). Consequently:
+\begin{itemize}
+  \item \textbf{Conservation of energy ($E$):}
+  \begin{equation*}
+  \frac{\partial H}{\partial t} = 0 \implies \dot{p}_t = 0 \implies p_t = -E \quad (\text{constant}) \tag{7a}\label{eq:7a}
+  \end{equation*}
+  This constant of motion is defined as the negative of the specific energy of the particle.
+
+  \item \textbf{Conservation of angular momentum ($L$):}
+  \begin{equation*}
+  \frac{\partial H}{\partial \phi} = 0 \implies \dot{p}_\phi = 0 \implies p_\phi = L \quad (\text{constant}) \tag{7b}\label{eq:7b}
+  \end{equation*}
+  This constant of motion is the specific angular momentum about the symmetry axis.
+\end{itemize}
+
+% ======================================================================
+\section{The equatorial plane}
+\label{sec:equatorial}
+
+Because the spacetime is fully spherically symmetric, a particle's trajectory always stays in a single plane. Without loss of generality the coordinates can be oriented so that the motion takes place in the equatorial plane:
+\begin{equation*}
+\theta = \frac{\pi}{2}, \quad p_\theta = 0, \quad \sin\theta = 1
+\end{equation*}
+
+Substituting this condition and the conserved quantities~\eqref{eq:7a} and~\eqref{eq:7b} into equation~\eqref{eq:5}, the Hamiltonian reduces to
+\begin{align*}
+    H &= \frac{1}{2} \left[ -\frac{(-E)^2}{f(r)} + f(r) p_r^2 + 0 + \frac{L^2}{r^2(1)} \right] \\
+    H &= \frac{1}{2} \left[ -\frac{E^2}{f(r)} + f(r) p_r^2 + \frac{L^2}{r^2} \right] \tag{8}\label{eq:8}
+\end{align*}
+
+% ======================================================================
+\section{Momentum and radial velocity}
+
+The second canonical equation relates the coordinate velocity to the derivative of the Hamiltonian with respect to the conjugate momentum:
+\begin{equation*}
+\dot{x}^\mu = \frac{\partial H}{\partial p_\mu} \tag{9}\label{eq:9}
+\end{equation*}
+
+For the radial component,
+\begin{align*}
+    \dot{r} &= \frac{\partial H}{\partial p_r} = \frac{1}{2} \left[ 2 f(r) p_r \right] \\
+    \dot{r} &= f(r) p_r \tag{10}\label{eq:10}
+\end{align*}
+
+The radial momentum can therefore be written in terms of the radial velocity:
+\begin{equation*}
+p_r = \frac{\dot{r}}{f(r)} \tag{11}\label{eq:11}
+\end{equation*}
+
+% ======================================================================
+\section{The radial equation of motion}
+
+From the normalization of the 4-momentum ($g^{\mu\nu} p_\mu p_\nu = -\epsilon$), the constant value of the Hamiltonian is
+\begin{equation*}
+H = -\frac{\epsilon}{2} \tag{12}\label{eq:12}
+\end{equation*}
+where
+\begin{itemize}
+  \item $\epsilon = 1$ for massive particles (timelike geodesics),
+  \item $\epsilon = 0$ for photons and other massless particles (null geodesics).
+\end{itemize}
+
+Substitute equations~\eqref{eq:11} and~\eqref{eq:12} into equation~\eqref{eq:8}:
+\begin{align*}
+    -\frac{\epsilon}{2} &= \frac{1}{2} \left[ -\frac{E^2}{f(r)} + f(r) \left( \frac{\dot{r}}{f(r)} \right)^2 + \frac{L^2}{r^2} \right] \\
+    -\epsilon &= -\frac{E^2}{f(r)} + f(r) \frac{\dot{r}^2}{f(r)^2} + \frac{L^2}{r^2} \\
+    -\epsilon &= -\frac{E^2}{f(r)} + \frac{\dot{r}^2}{f(r)} + \frac{L^2}{r^2}
+\end{align*}
+
+Multiply both sides by $f(r)$:
+\begin{equation*}
+-\epsilon f(r) = -E^2 + \dot{r}^2 + f(r) \frac{L^2}{r^2}
+\end{equation*}
+
+Move terms to isolate $\dot{r}^2$:
+\begin{align*}
+    \dot{r}^2 &= E^2 - \epsilon f(r) - f(r) \frac{L^2}{r^2} \\
+    \dot{r}^2 &= E^2 - f(r) \left( \epsilon + \frac{L^2}{r^2} \right) \tag{13}\label{eq:13}
+\end{align*}
+
+% ======================================================================
+\section{The effective potential}
+
+The radial equation~\eqref{eq:13} can be written like the conservation of mechanical energy in classical mechanics:
+\begin{equation*}
+\dot{r}^2 + \Veff(r) = E^2 \tag{14}\label{eq:14}
+\end{equation*}
+by defining the \textbf{effective potential} $\Veff(r)$ as
+\begin{equation*}
+\Veff(r) = f(r) \left( \epsilon + \frac{L^2}{r^2} \right) \tag{15}\label{eq:15}
+\end{equation*}
+
+\subsection*{Special case: the Schwarzschild metric}
+
+Outside a non-rotating body of mass $M$ (the Schwarzschild metric) the metric function is
+\begin{equation*}
+f(r) = 1 - \frac{2M}{r} \tag{16}\label{eq:16}
+\end{equation*}
+in geometrized units where $G = c = 1$.
+
+Substituting $f(r)$ into equation~\eqref{eq:15} gives the explicit effective potential
+\begin{align*}
+    \Veff(r) &= \left( 1 - \frac{2M}{r} \right) \left( \epsilon + \frac{L^2}{r^2} \right) \\
+    \Veff(r) &= \epsilon - \frac{2M\epsilon}{r} + \frac{L^2}{r^2} - \frac{2ML^2}{r^3} \tag{17}\label{eq:17}
+\end{align*}
+
+Physical interpretation of the terms:
+\begin{enumerate}
+  \item $\epsilon$: the rest energy of the particle ($1$ for massive particles, $0$ for photons).
+  \item $-\frac{2M\epsilon}{r}$: the Newtonian gravitational potential.
+  \item $\frac{L^2}{r^2}$: the Newtonian centrifugal barrier.
+  \item $-\frac{2ML^2}{r^3}$: the General Relativity correction, responsible for the precession of the orbit's periapsis and for the strong attraction at short distances.
+\end{enumerate}
+
+% ======================================================================
+\section{Why use the full Hamilton equations?}
+
+The radial equation~\eqref{eq:13} has the form $\dot{r}^2 = E^2 - \Veff(r)$. For numerical work this form is \textbf{not ideal}:
+\begin{enumerate}
+  \item Obtaining $\dot{r}$ requires a square root, $\dot{r} = \pm\sqrt{E^2 - \Veff}$, so the $\pm$ sign has to be switched by hand each time the particle passes a turning point ($\dot{r} = 0$), for example at periapsis or apoapsis.
+  \item Near a turning point $E^2 - \Veff \to 0$; a small numerical error can make the argument of the square root negative and the integration fails.
+\end{enumerate}
+
+The solution is to use \textbf{all} of Hamilton's canonical equations~\eqref{eq:6} and~\eqref{eq:9}. They form a system of \textbf{first-order} ordinary differential equations (ODEs) that has no square root and passes through turning points automatically:
+\begin{equation*}
+\boxed{\;\dot{x}^\mu = \frac{\partial H}{\partial p_\mu}, \qquad \dot{p}_\mu = -\frac{\partial H}{\partial x^\mu}\;} \tag{18}\label{eq:18}
+\end{equation*}
+where a dot denotes the derivative with respect to the affine parameter $\lambda$ (for massive particles $\lambda = \tau$ is the proper time). The 4 coordinates $(t, r, \theta, \phi)$ and 4 momenta $(p_t, p_r, p_\theta, p_\phi)$ give 8 first-order ODEs.
+
+As a starting point, the general Hamiltonian~\eqref{eq:5} is rewritten:
+\begin{equation*}
+H = \frac{1}{2} \left[ -\frac{p_t^2}{f(r)} + f(r)\, p_r^2 + \frac{p_\theta^2}{r^2} + \frac{p_\phi^2}{r^2 \sin^2\theta} \right]
+\end{equation*}
+
+% ======================================================================
+\section{Velocity equations \texorpdfstring{($\dot{x}^\mu = \partial H / \partial p_\mu$)}{}}
+
+Each momentum $p_\mu$ appears in exactly one term inside the brackets of $H$, so its partial derivative follows immediately.
+
+\textbf{The $t$ component.} Only the first term depends on $p_t$:
+\begin{equation*}
+\dot{t} = \frac{\partial H}{\partial p_t} = \frac{1}{2}\left( -\frac{2 p_t}{f(r)} \right) = -\frac{p_t}{f(r)} \tag{19a}\label{eq:19a}
+\end{equation*}
+
+\textbf{The $r$ component.} Only the second term depends on $p_r$ (same as equation~\eqref{eq:10}):
+\begin{equation*}
+\dot{r} = \frac{\partial H}{\partial p_r} = \frac{1}{2}\left( 2 f(r)\, p_r \right) = f(r)\, p_r \tag{19b}\label{eq:19b}
+\end{equation*}
+
+\textbf{The $\theta$ component.} Only the third term depends on $p_\theta$:
+\begin{equation*}
+\dot{\theta} = \frac{\partial H}{\partial p_\theta} = \frac{1}{2}\left( \frac{2 p_\theta}{r^2} \right) = \frac{p_\theta}{r^2} \tag{19c}\label{eq:19c}
+\end{equation*}
+
+\textbf{The $\phi$ component.} Only the fourth term depends on $p_\phi$:
+\begin{equation*}
+\dot{\phi} = \frac{\partial H}{\partial p_\phi} = \frac{1}{2}\left( \frac{2 p_\phi}{r^2 \sin^2\theta} \right) = \frac{p_\phi}{r^2 \sin^2\theta} \tag{19d}\label{eq:19d}
+\end{equation*}
+
+Note that equation~(19) is just $\dot{x}^\mu = g^{\mu\nu} p_\nu = p^\mu$, the relation between covariant and contravariant momenta (raising an index with the metric).
+
+% ======================================================================
+\section{Momentum equations \texorpdfstring{($\dot{p}_\mu = -\partial H / \partial x^\mu$)}{}}
+
+\subsection{The \texorpdfstring{$t$ and $\phi$}{t and phi} components (cyclic coordinates)}
+
+Because $H$ does not contain $t$ or $\phi$ explicitly,
+\begin{align*}
+    \dot{p}_t &= -\frac{\partial H}{\partial t} = 0 \tag{20a}\label{eq:20a} \\
+    \dot{p}_\phi &= -\frac{\partial H}{\partial \phi} = 0 \tag{20b}\label{eq:20b}
+\end{align*}
+which recovers the conserved quantities $p_t = -E$ and $p_\phi = L$ of equation~(7).
+
+\subsection{The \texorpdfstring{$r$}{r} component}
+
+The coordinate $r$ appears in all four terms. Write $f'(r) \equiv \dfrac{df}{dr}$ and differentiate term by term:
+\begin{itemize}
+  \item First term (use $\frac{d}{dr}\left(\frac{1}{f}\right) = -\frac{f'}{f^2}$):
+  \begin{equation*}
+  \frac{\partial}{\partial r}\left( -\frac{p_t^2}{f} \right) = -p_t^2 \left( -\frac{f'}{f^2} \right) = \frac{f'\, p_t^2}{f^2}
+  \end{equation*}
+  \item Second term:
+  \begin{equation*}
+  \frac{\partial}{\partial r}\left( f\, p_r^2 \right) = f'\, p_r^2
+  \end{equation*}
+  \item Third term:
+  \begin{equation*}
+  \frac{\partial}{\partial r}\left( \frac{p_\theta^2}{r^2} \right) = -\frac{2 p_\theta^2}{r^3}
+  \end{equation*}
+  \item Fourth term:
+  \begin{equation*}
+  \frac{\partial}{\partial r}\left( \frac{p_\phi^2}{r^2 \sin^2\theta} \right) = -\frac{2 p_\phi^2}{r^3 \sin^2\theta}
+  \end{equation*}
+\end{itemize}
+
+Add them and multiply by $\tfrac{1}{2}$:
+\begin{equation*}
+\frac{\partial H}{\partial r} = \frac{f'}{2}\left( \frac{p_t^2}{f^2} + p_r^2 \right) - \frac{p_\theta^2}{r^3} - \frac{p_\phi^2}{r^3 \sin^2\theta}
+\end{equation*}
+Hence
+\begin{equation*}
+\dot{p}_r = -\frac{\partial H}{\partial r} = -\frac{f'(r)}{2}\left( \frac{p_t^2}{f(r)^2} + p_r^2 \right) + \frac{p_\theta^2}{r^3} + \frac{p_\phi^2}{r^3 \sin^2\theta} \tag{20c}\label{eq:20c}
+\end{equation*}
+
+\subsection{The \texorpdfstring{$\theta$}{theta} component}
+
+Only the fourth term depends on $\theta$. With $\frac{d}{d\theta}\left(\sin^{-2}\theta\right) = -2\sin^{-3}\theta \cos\theta$,
+\begin{equation*}
+\frac{\partial H}{\partial \theta} = \frac{1}{2}\, \frac{p_\phi^2}{r^2} \left( -\frac{2\cos\theta}{\sin^3\theta} \right) = -\frac{p_\phi^2 \cos\theta}{r^2 \sin^3\theta}
+\end{equation*}
+Hence
+\begin{equation*}
+\dot{p}_\theta = -\frac{\partial H}{\partial \theta} = \frac{p_\phi^2 \cos\theta}{r^2 \sin^3\theta} \tag{20d}\label{eq:20d}
+\end{equation*}
+
+\subsection{Explicit form for Schwarzschild}
+
+For $f(r) = 1 - \dfrac{2M}{r}$ (equation~\eqref{eq:16}) the derivative is
+\begin{equation*}
+f'(r) = \frac{2M}{r^2} \tag{21}\label{eq:21}
+\end{equation*}
+and the combination appearing in~\eqref{eq:20c} simplifies:
+\begin{equation*}
+\frac{f'}{f^2} = \frac{2M/r^2}{\left(1 - \frac{2M}{r}\right)^2} = \frac{2M/r^2}{(r - 2M)^2 / r^2} = \frac{2M}{(r - 2M)^2}
+\end{equation*}
+Substituting into~\eqref{eq:20c} gives
+\begin{equation*}
+\dot{p}_r = -\frac{M\, p_t^2}{(r - 2M)^2} - \frac{M\, p_r^2}{r^2} + \frac{p_\theta^2}{r^3} + \frac{p_\phi^2}{r^3 \sin^2\theta} \tag{22}\label{eq:22}
+\end{equation*}
+
+\subsection{Summary: the full 8-equation system (3D)}
+
+\begin{equation*}
+\begin{aligned}
+    \dot{t} &= -\frac{p_t}{1 - 2M/r}, &
+    \dot{p}_t &= 0, \\[4pt]
+    \dot{r} &= \left(1 - \frac{2M}{r}\right) p_r, &
+    \dot{p}_r &= -\frac{M\, p_t^2}{(r - 2M)^2} - \frac{M\, p_r^2}{r^2} + \frac{p_\theta^2}{r^3} + \frac{p_\phi^2}{r^3 \sin^2\theta}, \\[4pt]
+    \dot{\theta} &= \frac{p_\theta}{r^2}, &
+    \dot{p}_\theta &= \frac{p_\phi^2 \cos\theta}{r^2 \sin^3\theta}, \\[4pt]
+    \dot{\phi} &= \frac{p_\phi}{r^2 \sin^2\theta}, &
+    \dot{p}_\phi &= 0.
+\end{aligned} \tag{23}\label{eq:23}
+\end{equation*}
+
+System~\eqref{eq:23} holds for motion in an arbitrary plane and can be used directly to simulate 3D motion (for example many photons with different orientations for ray tracing). It is singular at $\sin\theta = 0$ (the polar axis), however, so for a single particle it is more practical to use the reduction to the equatorial plane below.
+
+% ======================================================================
+\section{Reduction to the equatorial plane: the system used in simulations}
+
+\subsection{Consistency of the equatorial plane}
+
+Choose the initial conditions $\theta(0) = \pi/2$ and $p_\theta(0) = 0$. From~\eqref{eq:23},
+\begin{equation*}
+\dot{\theta}\big|_{\lambda=0} = \frac{0}{r^2} = 0, \qquad
+\dot{p}_\theta\big|_{\lambda=0} = \frac{L^2 \cos(\pi/2)}{r^2 \sin^3(\pi/2)} = \frac{L^2 \cdot 0}{r^2} = 0
+\end{equation*}
+
+Since neither $\theta$ nor $p_\theta$ changes, they \textbf{remain} $\pi/2$ and $0$ along the whole trajectory. The motion is indeed confined to the equatorial plane, which justifies the assumption of Section~\ref{sec:equatorial}.
+
+\subsection{The reduced system}
+
+Substitute $\theta = \pi/2$, $p_\theta = 0$, $p_t = -E$ and $p_\phi = L$ into~\eqref{eq:23}. The equations for $\theta$, $p_\theta$, $p_t$ and $p_\phi$ become trivial, leaving \textbf{four first-order ODEs}:
+\begin{equation*}
+\boxed{
+\begin{aligned}
+    \frac{dt}{d\lambda} &= \frac{E}{1 - \dfrac{2M}{r}} \\[6pt]
+    \frac{dr}{d\lambda} &= \left(1 - \frac{2M}{r}\right) p_r \\[6pt]
+    \frac{d\phi}{d\lambda} &= \frac{L}{r^2} \\[6pt]
+    \frac{dp_r}{d\lambda} &= -\frac{M E^2}{(r - 2M)^2} - \frac{M\, p_r^2}{r^2} + \frac{L^2}{r^3}
+\end{aligned}
+} \tag{24}\label{eq:24}
+\end{equation*}
+
+Equation~\eqref{eq:24} is the \textbf{final result, ready for numerical simulation}. Some important remarks:
+\begin{itemize}
+  \item \textbf{The parameter $\epsilon$ does not appear explicitly in~\eqref{eq:24}.} Massive particles ($\epsilon = 1$) and photons ($\epsilon = 0$) obey exactly the same equations; the difference enters only through the \textbf{initial condition} $p_r(0)$ (see Section~\ref{sec:initial}).
+  \item The right-hand side of~\eqref{eq:24} \textbf{does not depend} on $t$, $\phi$ or $\lambda$ (an autonomous system). Only $r$ and $p_r$ determine the rates of change; $t$ and $\phi$ are simply ``accumulated''.
+  \item Physical meaning of the terms in $\dot{p}_r$:
+  \begin{itemize}
+    \item $-\dfrac{ME^2}{(r-2M)^2}$: the gravitational pull, affected by the energy (it diverges at the horizon),
+    \item $-\dfrac{M p_r^2}{r^2}$: a correction from the curvature of the radial part of the metric,
+    \item $+\dfrac{L^2}{r^3}$: the centrifugal force.
+  \end{itemize}
+\end{itemize}
+
+\subsection{General form (arbitrary \texorpdfstring{$f(r)$}{f(r)})}
+
+To change the metric (for example Reissner--Nordstr\"om, de~Sitter--Schwarzschild, etc.), use the general form before substituting $f$:
+\begin{equation*}
+\begin{aligned}
+    \dot{t} &= \frac{E}{f(r)}, &
+    \dot{r} &= f(r)\, p_r, \\[4pt]
+    \dot{\phi} &= \frac{L}{r^2}, &
+    \dot{p}_r &= -\frac{f'(r)}{2}\left( \frac{E^2}{f(r)^2} + p_r^2 \right) + \frac{L^2}{r^3}
+\end{aligned} \tag{25}\label{eq:25}
+\end{equation*}
+so the code only needs different functions \texttt{f(r)} and \texttt{df(r)}.
+
+% ======================================================================
+\section{Verification: consistency with the effective potential}
+
+To check~\eqref{eq:24}, derive the radial acceleration $\ddot{r}$ from Hamilton's equations and compare it with the result from equation~\eqref{eq:14}.
+
+\textbf{From equation~\eqref{eq:14}.} Differentiate $\dot{r}^2 + \Veff = E^2$ with respect to $\lambda$:
+\begin{equation*}
+2\dot{r}\ddot{r} + \frac{d\Veff}{dr}\dot{r} = 0 \implies \ddot{r} = -\frac{1}{2}\frac{d\Veff}{dr}
+\end{equation*}
+With $\Veff = f\left(\epsilon + \frac{L^2}{r^2}\right)$,
+\begin{equation*}
+\ddot{r} = -\frac{f'}{2}\left(\epsilon + \frac{L^2}{r^2}\right) + \frac{f L^2}{r^3} \tag{26}\label{eq:26}
+\end{equation*}
+
+\textbf{From Hamilton's equations.} Differentiate~\eqref{eq:19b} with the chain rule, $\frac{d f}{d\lambda} = f'\dot{r} = f' f p_r$:
+\begin{equation*}
+\ddot{r} = \frac{d}{d\lambda}\left( f p_r \right) = f' \dot{r}\, p_r + f \dot{p}_r = f f' p_r^2 + f \left[ -\frac{f'}{2}\left( \frac{E^2}{f^2} + p_r^2 \right) + \frac{L^2}{r^3} \right]
+\end{equation*}
+\begin{equation*}
+\ddot{r} = \frac{f'}{2}\left( f p_r^2 \right) - \frac{f'}{2}\frac{E^2}{f} + \frac{f L^2}{r^3}
+\end{equation*}
+
+The Hamiltonian constraint $H = -\epsilon/2$ (equations~\eqref{eq:8} and~\eqref{eq:12}) gives $f p_r^2 = \dfrac{E^2}{f} - \epsilon - \dfrac{L^2}{r^2}$. Substituting,
+\begin{equation*}
+\ddot{r} = \frac{f'}{2}\left( \frac{E^2}{f} - \epsilon - \frac{L^2}{r^2} \right) - \frac{f'}{2}\frac{E^2}{f} + \frac{f L^2}{r^3}
+= -\frac{f'}{2}\left(\epsilon + \frac{L^2}{r^2}\right) + \frac{f L^2}{r^3}
+\end{equation*}
+
+This result is \textbf{identical} to~\eqref{eq:26}. $\checkmark$
+
+For Schwarzschild ($f' = 2M/r^2$),
+\begin{equation*}
+\ddot{r} = -\frac{M\epsilon}{r^2} + \frac{L^2}{r^3} - \frac{3ML^2}{r^4} \tag{27}\label{eq:27}
+\end{equation*}
+which is the Newtonian ``force'' plus the relativistic correction $-3ML^2/r^4$.
+
+% ======================================================================
+\section{Initial conditions, control quantities and stopping criteria}
+\label{sec:initial}
+
+\subsection{Units}
+
+Use geometrized units $G = c = 1$ and choose $M = 1$. Then $r$, $t$, $\lambda$ and $L$ are expressed in units of $M$, while $E$ is dimensionless. The event horizon is at $r_s = 2M = 2$.
+
+\subsection{Determining \texorpdfstring{$p_r(0)$}{p\_r(0)} from the Hamiltonian constraint}
+
+The initial state vector is $\left(t_0, r_0, \phi_0, p_{r,0}\right)$, usually with $t_0 = 0$ and $\phi_0 = 0$. The constants $E$ and $L$ can be chosen freely, but $p_{r,0}$ is \textbf{not} free: it must satisfy $H = -\epsilon/2$. From~\eqref{eq:13} and~\eqref{eq:11},
+\begin{equation*}
+p_{r,0} = \sigma\, \frac{\sqrt{E^2 - \Veff(r_0)}}{f(r_0)}, \qquad \sigma = \begin{cases} -1 & \text{ingoing} \\ +1 & \text{outgoing} \end{cases} \tag{28}\label{eq:28}
+\end{equation*}
+provided $E^2 \geq \Veff(r_0)$. The square root is used \textbf{only once}, here; during the integration the sign of $p_r$ is handled automatically by~\eqref{eq:24}.
+
+\subsection{Standard test cases}
+
+\textbf{(a) Circular orbit of a massive particle ($\epsilon = 1$).} The conditions are $\Veff'(r_c) = 0$ and $E^2 = \Veff(r_c)$. From $\Veff' = \frac{2M}{r^2}\left(1 + \frac{L^2}{r^2}\right) - \frac{2 f L^2}{r^3} = 0$, multiplying by $r^4/2$:
+\begin{equation*}
+M r^2 + M L^2 - L^2 r + 2ML^2 = 0 \implies L^2 (r - 3M) = M r^2
+\end{equation*}
+\begin{equation*}
+L = \sqrt{\frac{M r_c^2}{r_c - 3M}}, \qquad
+E = \frac{1 - 2M/r_c}{\sqrt{1 - 3M/r_c}}, \qquad
+p_{r,0} = 0 \tag{29}\label{eq:29}
+\end{equation*}
+
+Circular orbits are stable only for $r_c \geq 6M$ (the \emph{Innermost Stable Circular Orbit}, ISCO). The numerical result must give a constant $r(\lambda) = r_c$ and the angular frequency $d\phi/dt = \sqrt{M/r_c^3}$ (Kepler's law, which is exact in Schwarzschild coordinates).
+
+\textbf{(b) Bound orbit with precession ($\epsilon = 1$).} Start at apoapsis: choose $r_0$ and $L$, set $p_{r,0} = 0$ and $E = \sqrt{\Veff(r_0)}$. For example $r_0 = 20M$, $L = 4.2M$ gives a ``rosette'' orbit with $r \in [10.33M,\; 20M]$.
+
+\textbf{(c) Photons ($\epsilon = 0$).} Photon paths depend only on the impact parameter $b = L/E$, so $E = 1$ and $L = b$ can be used. The peak of the potential $\Veff = fL^2/r^2$ is at $r = 3M$ (the \emph{photon sphere}) with value $L^2/(27M^2)$, so the critical impact parameter is
+\begin{equation*}
+b_c = 3\sqrt{3}\, M \approx 5.196\, M \tag{30}\label{eq:30}
+\end{equation*}
+
+Photons with $b < b_c$ are captured by the black hole; those with $b > b_c$ are deflected and escape. For a photon coming from far away ($r_0 \gg M$):
+\begin{equation*}
+p_{r,0} = -\frac{\sqrt{1 - f(r_0)\, b^2 / r_0^2}}{f(r_0)}.
+\end{equation*}
+
+\subsection{The Hamiltonian constraint as an error check}
+
+Because $H$ is conserved exactly, the quantity
+\begin{equation*}
+\mathcal{C}(\lambda) = H + \frac{\epsilon}{2} = \frac{1}{2}\left[ -\frac{E^2}{f(r)} + f(r)\, p_r^2 + \frac{L^2}{r^2} \right] + \frac{\epsilon}{2} \tag{31}\label{eq:31}
+\end{equation*}
+should be zero along the whole trajectory. In a simulation $|\mathcal{C}|$ is computed at every step as an accuracy indicator. Close to the horizon the term $E^2/f$ grows, so it is better to monitor the relative error $|\mathcal{C}| \,/\, \left(E^2 / 2f\right)$.
+
+\subsection{Stopping criteria}
+\label{sec:stop}
+
+The integration stops when any of the following holds:
+\begin{itemize}
+  \item $r \leq 2M(1 + \delta)$, with $\delta \sim 10^{-3}$: the particle falls into the horizon. Schwarzschild coordinates are singular at $r = 2M$ ($f \to 0$, so $\dot{t} \to \infty$ and $p_r \to \infty$), so the integration cannot continue through the horizon.
+  \item $r \geq r_{\text{max}}$: the particle or photon has escaped to infinity.
+  \item $\lambda \geq \lambda_{\text{max}}$ or the maximum number of steps is reached.
+\end{itemize}
+
+\subsection{Conversion to Cartesian coordinates (visualization)}
+
+In the equatorial plane,
+\begin{equation*}
+x = r\cos\phi, \qquad y = r\sin\phi \tag{32}\label{eq:32}
+\end{equation*}
+
+% ======================================================================
+\section{The fourth-order Runge--Kutta method (RK4)}
+
+\subsection{The initial value problem}
+
+RK4 solves a system of first-order ODEs of the form
+\begin{equation*}
+\frac{d\mathbf{y}}{d\lambda} = \mathbf{F}(\lambda, \mathbf{y}), \qquad \mathbf{y}(\lambda_0) = \mathbf{y}_0 \tag{33}\label{eq:33}
+\end{equation*}
+where $\mathbf{y}$ is the state vector and $\mathbf{F}$ the right-hand side. The parameter $\lambda$ is discretized with step $h$: $\lambda_n = \lambda_0 + n h$ and $\mathbf{y}_n \approx \mathbf{y}(\lambda_n)$.
+
+\subsection{The basic idea}
+
+Exactly,
+\begin{equation*}
+\mathbf{y}_{n+1} = \mathbf{y}_n + \int_{\lambda_n}^{\lambda_n + h} \mathbf{F}(\lambda, \mathbf{y}(\lambda))\, d\lambda .
+\end{equation*}
+Euler's method approximates this integral using only the slope at the start of the interval, $h\,\mathbf{F}(\lambda_n, \mathbf{y}_n)$, so its error is $\mathcal{O}(h)$. RK4 improves on this by evaluating the slope at \textbf{four points} in the interval (start, midpoint twice, end) and taking a weighted average, analogous to Simpson's rule
+\begin{equation*}
+\int_{\lambda_n}^{\lambda_n + h} F\, d\lambda \approx \frac{h}{6}\left[F_{\text{start}} + 4F_{\text{mid}} + F_{\text{end}}\right],
+\end{equation*}
+where the midpoint weight $4$ is split into $2 + 2$.
+
+\subsection{The RK4 formulas}
+
+\begin{align*}
+    \mathbf{k}_1 &= \mathbf{F}\left(\lambda_n,\; \mathbf{y}_n\right) \tag{34a}\label{eq:34a} \\
+    \mathbf{k}_2 &= \mathbf{F}\left(\lambda_n + \tfrac{h}{2},\; \mathbf{y}_n + \tfrac{h}{2}\mathbf{k}_1\right) \tag{34b} \\
+    \mathbf{k}_3 &= \mathbf{F}\left(\lambda_n + \tfrac{h}{2},\; \mathbf{y}_n + \tfrac{h}{2}\mathbf{k}_2\right) \tag{34c} \\
+    \mathbf{k}_4 &= \mathbf{F}\left(\lambda_n + h,\; \mathbf{y}_n + h\,\mathbf{k}_3\right) \tag{34d} \\[4pt]
+    \mathbf{y}_{n+1} &= \mathbf{y}_n + \frac{h}{6}\left( \mathbf{k}_1 + 2\mathbf{k}_2 + 2\mathbf{k}_3 + \mathbf{k}_4 \right) \tag{34e}\label{eq:34e}
+\end{align*}
+
+Meaning of each stage:
+\begin{itemize}
+  \item $\mathbf{k}_1$: the slope at the start of the interval (same as Euler),
+  \item $\mathbf{k}_2$: the slope at the midpoint, using a half-step Euler prediction with $\mathbf{k}_1$,
+  \item $\mathbf{k}_3$: the slope at the midpoint again, using the improved prediction with $\mathbf{k}_2$,
+  \item $\mathbf{k}_4$: the slope at the end of the interval, using a full-step prediction with $\mathbf{k}_3$.
+\end{itemize}
+
+\subsection{Error}
+
+The local (per-step) error of RK4 is $\mathcal{O}(h^5)$ and the global error (accumulated over $N \propto 1/h$ steps) is $\mathcal{O}(h^4)$. Halving $h$ therefore reduces the global error by a factor of about $2^4 = 16$. This gives a simple convergence test: run the simulation with $h$ and $h/2$ and compare.
+
+Note: RK4 is \textbf{not} a symplectic integrator, so $H$ drifts slowly over very long integrations (thousands of orbits). For simulations of tens to hundreds of orbits with a reasonable $h$ the drift is very small and can be monitored through $\mathcal{C}(\lambda)$ in~\eqref{eq:31}.
+
+% ======================================================================
+\section{Applying RK4 to the Schwarzschild equations of motion}
+
+\subsection{State vector and right-hand side}
+
+From system~\eqref{eq:24}, define
+\begin{equation*}
+\mathbf{y} = \begin{pmatrix} t \\ r \\ \phi \\ p_r \end{pmatrix}, \qquad
+\mathbf{F}(\mathbf{y}) = \begin{pmatrix}
+    F^t \\ F^r \\ F^\phi \\ F^{p}
+\end{pmatrix} = \begin{pmatrix}
+    \dfrac{E}{1 - 2M/r} \\[8pt]
+    \left(1 - \dfrac{2M}{r}\right) p_r \\[8pt]
+    \dfrac{L}{r^2} \\[8pt]
+    -\dfrac{ME^2}{(r-2M)^2} - \dfrac{M p_r^2}{r^2} + \dfrac{L^2}{r^3}
+\end{pmatrix} \tag{35}\label{eq:35}
+\end{equation*}
+with $E$, $L$ and $M$ constant parameters. Since $\mathbf{F}$ does not depend on $\lambda$, the argument $\lambda$ in~(34) can be ignored.
+
+\subsection{One RK4 step in explicit form}
+\label{sec:rk4explicit}
+
+Let the state at step $n$ be $(t_n, r_n, \phi_n, p_{r,n})$. Since $\mathbf{F}$ depends only on $r$ and $p_r$, the only intermediate values that need to be computed are $r$ and $p_r$. Define
+\begin{equation*}
+f(r) = 1 - \frac{2M}{r}, \qquad G(r, p_r) \equiv -\frac{ME^2}{(r-2M)^2} - \frac{M p_r^2}{r^2} + \frac{L^2}{r^3}.
+\end{equation*}
+
+\textbf{Stage 1} (at $r_n,\, p_{r,n}$):
+\begin{equation*}
+\begin{aligned}
+    k_1^t &= \frac{E}{f(r_n)}, &
+    k_1^r &= f(r_n)\, p_{r,n}, \\[4pt]
+    k_1^\phi &= \frac{L}{r_n^2}, &
+    k_1^p &= G(r_n, p_{r,n})
+\end{aligned}
+\end{equation*}
+
+\textbf{Stage 2} (at the midpoint using $\mathbf{k}_1$):
+\begin{equation*}
+r^{(2)} = r_n + \tfrac{h}{2}k_1^r, \qquad p^{(2)} = p_{r,n} + \tfrac{h}{2}k_1^p
+\end{equation*}
+\begin{equation*}
+\begin{aligned}
+    k_2^t &= \frac{E}{f(r^{(2)})}, &
+    k_2^r &= f(r^{(2)})\, p^{(2)}, \\[4pt]
+    k_2^\phi &= \frac{L}{\left(r^{(2)}\right)^2}, &
+    k_2^p &= G\left(r^{(2)}, p^{(2)}\right)
+\end{aligned}
+\end{equation*}
+
+\textbf{Stage 3} (at the midpoint using $\mathbf{k}_2$):
+\begin{equation*}
+r^{(3)} = r_n + \tfrac{h}{2}k_2^r, \qquad p^{(3)} = p_{r,n} + \tfrac{h}{2}k_2^p
+\end{equation*}
+\begin{equation*}
+\begin{aligned}
+    k_3^t &= \frac{E}{f(r^{(3)})}, &
+    k_3^r &= f(r^{(3)})\, p^{(3)}, \\[4pt]
+    k_3^\phi &= \frac{L}{\left(r^{(3)}\right)^2}, &
+    k_3^p &= G\left(r^{(3)}, p^{(3)}\right)
+\end{aligned}
+\end{equation*}
+
+\textbf{Stage 4} (at the end of the interval using $\mathbf{k}_3$):
+\begin{equation*}
+r^{(4)} = r_n + h\,k_3^r, \qquad p^{(4)} = p_{r,n} + h\,k_3^p
+\end{equation*}
+\begin{equation*}
+\begin{aligned}
+    k_4^t &= \frac{E}{f(r^{(4)})}, &
+    k_4^r &= f(r^{(4)})\, p^{(4)}, \\[4pt]
+    k_4^\phi &= \frac{L}{\left(r^{(4)}\right)^2}, &
+    k_4^p &= G\left(r^{(4)}, p^{(4)}\right)
+\end{aligned}
+\end{equation*}
+
+\textbf{Update:}
+\begin{align*}
+    t_{n+1} &= t_n + \frac{h}{6}\left( k_1^t + 2k_2^t + 2k_3^t + k_4^t \right) \\
+    r_{n+1} &= r_n + \frac{h}{6}\left( k_1^r + 2k_2^r + 2k_3^r + k_4^r \right) \\
+    \phi_{n+1} &= \phi_n + \frac{h}{6}\left( k_1^\phi + 2k_2^\phi + 2k_3^\phi + k_4^\phi \right) \\
+    p_{r,n+1} &= p_{r,n} + \frac{h}{6}\left( k_1^p + 2k_2^p + 2k_3^p + k_4^p \right) \tag{36}\label{eq:36}
+\end{align*}
+
+\subsection{Choosing the step size \texorpdfstring{$h$}{h}}
+
+\begin{itemize}
+  \item Far from the black hole ($r \gtrsim 6M$) a fixed step $h \sim 0.01$--$0.1\,M$ is already very accurate.
+  \item Close to the horizon $p_r \sim 1/(r - 2M)$ and $\dot{p}_r \sim 1/(r - 2M)^2$ grow sharply. With a fixed $h$ the RK4 stages can ``jump'' to $r < 2M$ and produce meaningless values. A simple remedy is to shrink the step in proportion to the distance from the horizon:
+  \begin{equation*}
+  h_n = \min\left( h_0,\; \alpha\,(r_n - 2M) \right), \qquad \alpha \sim 0.02 \tag{37}\label{eq:37}
+  \end{equation*}
+  Since $\mathbf{F}$ does not depend on $\lambda$, changing $h$ from step to step does not break the RK4 scheme (just accumulate $\lambda_{n+1} = \lambda_n + h_n$).
+\end{itemize}
+
+\subsection{Algorithm}
+
+\begin{enumerate}
+  \item Set $M$, $\epsilon$, $E$, $L$, $r_0$, $\phi_0$, $t_0$, $h_0$, $\alpha$, $\delta$, $r_{\text{max}}$ and the maximum number of steps $N$.
+  \item Compute $p_{r,0}$ from~\eqref{eq:28} (or from~\eqref{eq:29}/\eqref{eq:30} for the test cases).
+  \item Form $\mathbf{y}_0 = (t_0, r_0, \phi_0, p_{r,0})$.
+  \item For $n = 0, 1, \ldots, N-1$:
+  \begin{enumerate}
+    \item Compute $h_n$ from~\eqref{eq:37}.
+    \item Compute $\mathbf{k}_1, \mathbf{k}_2, \mathbf{k}_3, \mathbf{k}_4$ from~\eqref{eq:35} as in Section~\ref{sec:rk4explicit}.
+    \item Update $\mathbf{y}_{n+1}$ with~\eqref{eq:36} and $\lambda_{n+1} = \lambda_n + h_n$.
+    \item Store $\mathbf{y}_{n+1}$ and compute $\mathcal{C}$ from~\eqref{eq:31}.
+    \item Stop if a stopping criterion (Section~\ref{sec:stop}) is met.
+  \end{enumerate}
+  \item Convert $(r, \phi)$ to $(x, y)$ with~\eqref{eq:32} for visualization.
+\end{enumerate}
+
+\subsection{Implementation}
+
+The algorithm is implemented in the \texttt{schwarzschild} package (directory \texttt{src/schwarzschild/}); the table maps the equations of this document to the code.
+
+\begin{center}
+\begin{tabular}{@{}lp{9.3cm}@{}}
+\toprule
+Equations & Code \\
+\midrule
+(15) & \texttt{metric.effective\_potential} \\
+(16), (21) & \texttt{metric.Schwarzschild.f}, \texttt{.df} \\
+(25) (equals (24) for Schwarzschild) & \texttt{equations.rhs} \\
+(28) & \texttt{initial\_conditions.initial\_radial\_momentum} \\
+(29) & \texttt{analytic.circular\_orbit\_constants} \\
+(30) & \texttt{analytic.critical\_impact\_parameter} \\
+(31) & \texttt{equations.hamiltonian\_constraint}, \texttt{equations.relative\_constraint\_error} \\
+(32) & \texttt{integrators.Trajectory.xy} \\
+(34), (36) & \texttt{integrators.rk4\_step} \\
+(37), Section~\ref{sec:stop} & \texttt{integrators.integrate} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Validation}
+
+The test suite (\texttt{tests/}) and the notebook compare the numerical results with closed-form predictions:
+\begin{itemize}
+  \item The circular orbit $r_c = 10M$ stays at $r = 10M$, and the numerical $d\phi/dt = 0.0316227766$ equals $\sqrt{M/r_c^3}$.
+  \item The bound orbit oscillates in $r \in [10.3308M,\; 20M]$ with $|\mathcal{C}| \sim 10^{-16}$. Its periapsis advance per orbit, $2.127094008$~rad, agrees with the exact elliptic-integral result $2.127093985$~rad (below) to a relative difference of $10^{-8}$.
+  \item The photon with $b = 5.19M$ is captured, while $b = 5.20M$ escapes after circling the photon sphere down to $r_{\min} \approx 3.07M$, consistent with $b_c = 3\sqrt{3}M \approx 5.196M$ in~\eqref{eq:30}.
+  \item For large $b$ the deflection angle follows the weak-field series $\alpha \approx 4M/b + \frac{15\pi}{4}(M/b)^2 + \frac{128}{3}(M/b)^3 + \frac{3465\pi}{64}(M/b)^4$; for $b = 40M$ the numerical value is $0.108104$ against $0.108096$ from the series.
+  \item The measured global convergence order of RK4 is $3.996$ (theory: $4$).
+\end{itemize}
+
+\textbf{Exact periapsis advance.} With $u = 1/r$, the orbit equation of a massive particle is $(du/d\phi)^2 = 2M(u - u_1)(u - u_2)(u - u_3)$. The turning points $u_1 = 1/r_{\text{apo}}$ and $u_2 = 1/r_{\text{peri}}$ fix the third root through $u_1 + u_2 + u_3 = 1/(2M)$, and the angle swept in one radial period is
+\begin{equation*}
+\Delta\phi = \frac{4\,K(k^2)}{\sqrt{2M(u_3 - u_1)}}, \qquad k^2 = \frac{u_2 - u_1}{u_3 - u_1},
+\end{equation*}
+where $K$ is the complete elliptic integral of the first kind. The periapsis advance per orbit is $\Delta\phi - 2\pi$ (function \texttt{analytic.precession\_per\_orbit}).
+
+\end{document}

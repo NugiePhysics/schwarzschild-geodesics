@@ -1,0 +1,32 @@
+# Environments
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# LaTeX build artifacts (the PDF is built in CI)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+docs/*.pdf
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Local archive of pre-restructuring files (not part of the repository)
+.archive/

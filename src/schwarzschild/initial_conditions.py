@@ -7,6 +7,11 @@ import numpy as np
 from .metric import Metric, effective_potential, resolve_metric
 
 
+def _require_outside_horizon(r0: float, metric: Metric) -> None:
+    if r0 <= metric.horizon:
+        raise ValueError(f"r0 = {r0} must lie outside the horizon r = {metric.horizon}")
+
+
 def initial_radial_momentum(
     r0: float,
     E: float,
@@ -23,9 +28,10 @@ def initial_radial_momentum(
     Raises
     ------
     ValueError
-        If ``E^2 < V_eff(r0)``, i.e. ``r0`` is in a forbidden region.
+        If ``r0`` is not outside the horizon, or ``E^2 < V_eff(r0)`` (a forbidden region).
     """
     metric = resolve_metric(metric)
+    _require_outside_horizon(r0, metric)
     D = E**2 - effective_potential(r0, L, eps, metric)
     if D < 0:
         raise ValueError("E^2 < V_eff(r0): the starting position is not allowed")
@@ -36,6 +42,8 @@ def energy_at_turning_point(
     r0: float, L: float, eps: float = 1.0, metric: Metric | None = None
 ) -> float:
     """Energy ``E = sqrt(V_eff(r0))`` for which ``r0`` is a turning point (``p_r = 0``)."""
+    metric = resolve_metric(metric)
+    _require_outside_horizon(r0, metric)
     return float(np.sqrt(effective_potential(r0, L, eps, metric)))
 
 

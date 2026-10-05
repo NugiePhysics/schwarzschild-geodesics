@@ -11,7 +11,7 @@ from .equations import hamiltonian_constraint, relative_constraint_error, rhs
 from .metric import Metric, resolve_metric
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class Trajectory:
     """Result of :func:`integrate`.
 
@@ -116,10 +116,19 @@ def integrate(
         Stop when ``r <= r_h (1 + delta)`` (the particle is considered captured).
     r_max
         Stop when ``r >= r_max`` (the particle has escaped).
+
+    Raises
+    ------
+    ValueError
+        If ``h0`` or ``alpha`` is not positive, or ``y0`` is not outside the horizon.
     """
+    if h0 <= 0 or alpha <= 0:
+        raise ValueError("h0 and alpha must be positive")
     metric = resolve_metric(metric)
     r_h = metric.horizon
     y = np.array(y0, dtype=float)
+    if y[1] <= r_h:
+        raise ValueError(f"the initial radius r = {y[1]} must lie outside the horizon r = {r_h}")
     lam = 0.0
     lams, states = [lam], [y.copy()]
     reason = "max_steps"
@@ -161,9 +170,15 @@ def integrate_fixed(
 ) -> NDArray[np.float64]:
     """Fixed-step RK4 up to ``lam_end``; returns only the final state.
 
-    Meant for convergence studies far from the horizon, where the adaptive step is not needed.
+    ``h`` is adjusted slightly, if needed, so that a whole number of steps ends exactly at
+    ``lam_end``. Meant for convergence studies far from the horizon, where the adaptive step is
+    not needed.
     """
+    if h <= 0 or lam_end <= 0:
+        raise ValueError("h and lam_end must be positive")
+    n_steps = max(1, round(lam_end / h))
+    h = lam_end / n_steps
     y = np.array(y0, dtype=float)
-    for _ in range(round(lam_end / h)):
+    for _ in range(n_steps):
         y = rk4_step(y, h, E, L, metric)
     return y

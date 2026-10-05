@@ -35,12 +35,18 @@ def deflection_angle(
     r_far: float = 1000.0,
     h0: float = 0.5,
     alpha: float = 0.02,
+    max_steps: int = 500_000,
 ) -> float:
     """Total deflection ``alpha = Delta phi - pi`` of a photon with impact parameter ``b``.
 
     The photon starts and ends at ``r ~ r_far``; the (straight-line) angle ``arcsin(b/r)``
     covered outside that radius is added back at both ends. The remaining error is of order
     ``M b / r_far^2``. Returns ``nan`` if the photon is captured.
+
+    Raises
+    ------
+    RuntimeError
+        If the integration stops before the photon is either captured or back at ``r_far``.
     """
     traj = integrate(
         photon_state(r_far, b, metric),
@@ -51,9 +57,14 @@ def deflection_angle(
         h0=h0,
         alpha=alpha,
         r_max=r_far + 1e-6,
+        max_steps=max_steps,
     )
     if traj.captured:
         return math.nan
+    if traj.reason != "escaped":
+        raise RuntimeError(
+            f"integration stopped early ({traj.reason}) for b = {b}; increase max_steps or h0"
+        )
     dphi = traj.phi[-1] + math.asin(b / r_far) + math.asin(b / traj.r[-1])
     return float(dphi - math.pi)
 

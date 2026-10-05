@@ -9,27 +9,27 @@ Numerical simulation of **massive particles and light rays orbiting a Schwarzsch
 
 ![Photon paths around a Schwarzschild black hole next to a precessing bound orbit](docs/figures/hero.png)
 
-*Left: photons with different impact parameters; those with $b < b_c = 3\sqrt{3}\,M$ are captured. Right: a bound orbit whose periapsis advances every revolution. The black disk is the horizon, the dashed circle the photon sphere ($3M$) and the dotted circle the ISCO ($6M$).*
+*Left: photons with different impact parameters; those with $`b \lt b_c = 3\sqrt{3}\,M`$ are captured. Right: a bound orbit whose periapsis advances every revolution. The black disk is the horizon, the dashed circle the photon sphere ($`3M`$) and the dotted circle the ISCO ($`6M`$).*
 
 ## Features
 
 - **Hamiltonian formulation.** The geodesic equations are written as four first-order ODEs, so there is no square root and no manual sign flip at turning points ([derivation](docs/derivation.md)).
-- **One set of equations for particles and photons.** Mass enters only through the initial radial momentum, fixed by the constraint $H = -\epsilon/2$.
-- **RK4 with an adaptive step near the horizon**, where $p_r$ and $\dot p_r$ diverge.
-- **Built-in accuracy monitor.** The Hamiltonian constraint $\mathcal{C} = H + \epsilon/2$ must vanish along a geodesic and is recorded at every step.
-- **Pluggable metric.** Any static, spherically symmetric $f(r)$ works: implement `f`, `df` and `horizon` (see [`metric.py`](src/schwarzschild/metric.py)).
-- **Tested against analytic results**: Kepler's law, an elliptic-integral formula for periapsis precession, the critical impact parameter, weak-field light bending, and the $h^4$ convergence of RK4.
+- **One set of equations for particles and photons.** Mass enters only through the initial radial momentum, fixed by the constraint $`H = -\epsilon/2`$.
+- **RK4 with an adaptive step near the horizon**, where $`p_r`$ and $`\dot p_r`$ diverge.
+- **Built-in accuracy monitor.** The Hamiltonian constraint $`\mathcal{C} = H + \epsilon/2`$ must vanish along a geodesic and is recorded at every step.
+- **Pluggable metric.** Any static, spherically symmetric $`f(r)`$ works: implement `f`, `df` and `horizon` (see [`metric.py`](src/schwarzschild/metric.py)).
+- **Tested against analytic results**: Kepler's law, an elliptic-integral formula for periapsis precession, the critical impact parameter, weak-field light bending, and the $`h^4`$ convergence of RK4.
 
 ## Validation
 
 | Check | Numerical | Analytical |
 |---|---|---|
-| Circular orbit $r_c = 10M$: $d\phi/dt$ | 0.0316227766 | $\sqrt{M/r_c^3} = 0.0316227766$ |
-| Periapsis advance per orbit ($r_\text{apo} = 20M$, $L = 4.2M$) | 2.127094008 rad | 2.127093985 rad (elliptic integral) |
-| Photon capture threshold | $b = 5.19M$ captured, $b = 5.20M$ escapes | $b_c = 3\sqrt{3}\,M \approx 5.196M$ |
-| Light deflection at $b = 40M$ | 0.108104 rad | 0.108096 rad (4th-order weak-field series) |
+| Circular orbit $`r_c = 10M`$: $`d\phi/dt`$ | 0.0316227766 | $`\sqrt{M/r_c^3} = 0.0316227766`$ |
+| Periapsis advance per orbit ($`r_\text{apo} = 20M`$, $`L = 4.2M`$) | 2.127094008 rad | 2.127093985 rad (elliptic integral) |
+| Photon capture threshold | $`b = 5.19M`$ captured, $`b = 5.20M`$ escapes | $`b_c = 3\sqrt{3}\,M \approx 5.196M`$ |
+| Light deflection at $`b = 40M`$ | 0.108104 rad | 0.108096 rad (4th-order weak-field series) |
 | Global order of RK4 | 3.996 | 4 |
-| Hamiltonian constraint $\lvert\mathcal{C}\rvert$ (bound orbit) | $\le 4\times10^{-16}$ | 0 |
+| Hamiltonian constraint $`\lvert\mathcal{C}\rvert`$ (bound orbit) | $`\le 4\times10^{-16}`$ | 0 |
 
 All of these are asserted in the [test suite](tests/) and reproduced in the [notebook](notebooks/schwarzschild_simulation.ipynb).
 
@@ -73,16 +73,16 @@ plt.show()
 
 ## The physics in a minute
 
-In Schwarzschild spacetime, $f(r) = 1 - 2M/r$, the equatorial geodesics follow from the Hamiltonian $H = \tfrac12 g^{\mu\nu}p_\mu p_\nu = -\epsilon/2$ ($\epsilon = 1$ for massive particles, $0$ for photons), with conserved energy $E = -p_t$ and angular momentum $L = p_\phi$. Hamilton's equations for the state $(t, r, \phi, p_r)$ become
+In Schwarzschild spacetime, $`f(r) = 1 - 2M/r`$, the equatorial geodesics follow from the Hamiltonian $`H = \tfrac12 g^{\mu\nu}p_\mu p_\nu = -\epsilon/2`$ ($`\epsilon = 1`$ for massive particles, $`0`$ for photons), with conserved energy $`E = -p_t`$ and angular momentum $`L = p_\phi`$. Hamilton's equations for the state $`(t, r, \phi, p_r)`$ become
 
-$$
+```math
 \dot t = \frac{E}{f}, \qquad
 \dot r = f\,p_r, \qquad
 \dot\phi = \frac{L}{r^2}, \qquad
 \dot p_r = -\frac{f'}{2}\left(\frac{E^2}{f^2} + p_r^2\right) + \frac{L^2}{r^3},
-$$
+```
 
-where the dot is the derivative with respect to the affine parameter (proper time for massive particles). The full derivation, including the radial effective potential, the choice of initial conditions and the RK4 scheme, is in [`docs/derivation.md`](docs/derivation.md) (also as [LaTeX](docs/derivation.tex); a PDF is attached to each release).
+where the dot is the derivative with respect to the affine parameter (proper time for massive particles). The full derivation, including the radial effective potential, the choice of initial conditions and the RK4 scheme, is in [`docs/derivation.md`](docs/derivation.md), also available as a typeset [PDF](docs/derivation.pdf) built from [LaTeX](docs/derivation.tex).
 
 ## Project structure
 
@@ -98,7 +98,7 @@ src/schwarzschild/
 tests/                     pytest suite
 notebooks/                 walkthrough notebook (outputs included)
 scripts/make_figures.py    regenerates docs/figures/
-docs/                      derivation (Markdown + LaTeX) and figures
+docs/                      derivation (Markdown, LaTeX, PDF) and figures
 ```
 
 ## Development
@@ -109,9 +109,10 @@ pre-commit install          # ruff lint + format on every commit
 pytest                      # unit and validation tests (a few seconds)
 pytest --nbmake notebooks/  # execute the notebook end to end
 python scripts/make_figures.py
+tectonic docs/derivation.tex  # rebuild docs/derivation.pdf after editing the LaTeX source
 ```
 
-CI runs the linters, the tests and the notebook on Python 3.10 to 3.14.
+CI runs the linters, the tests and the notebook on Python 3.10 to 3.14, and checks that the LaTeX derivation compiles.
 
 ## Roadmap
 

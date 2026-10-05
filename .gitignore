@@ -15,13 +15,12 @@ dist/
 # Jupyter
 .ipynb_checkpoints/
 
-# LaTeX build artifacts (the PDF is built in CI)
+# LaTeX build artifacts (docs/derivation.pdf itself is committed)
 *.aux
 *.log
 *.out
 *.toc
 *.synctex.gz
-docs/*.pdf
 
 # Editors / OS
 .vscode/

@@ -13,6 +13,7 @@
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage[colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
 
 \setlength{\parindent}{0pt}
@@ -650,7 +651,7 @@ r^{(4)} = r_n + h\,k_3^r, \qquad p^{(4)} = p_{r,n} + h\,k_3^p
 The algorithm is implemented in the \texttt{schwarzschild} package (directory \texttt{src/schwarzschild/}); the table maps the equations of this document to the code.
 
 \begin{center}
-\begin{tabular}{@{}lp{9.3cm}@{}}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{9.3cm}@{}}
 \toprule
 Equations & Code \\
 \midrule

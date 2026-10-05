@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "schwarzschild-geodesics"
+type: software
+abstract: >-
+  Hamiltonian RK4 simulation of timelike and null geodesics around a Schwarzschild
+  black hole, validated against closed-form results.
+authors:
+  - family-names: Saputra
+    given-names: Nugie
+version: 0.1.0
+date-released: 2026-10-05
+license: MIT
+repository-code: "https://github.com/NugiePhysics/schwarzschild-geodesics"
+keywords:
+  - general relativity
+  - black hole
+  - geodesics
+  - Schwarzschild metric
+  - Runge-Kutta
+  - Hamiltonian mechanics

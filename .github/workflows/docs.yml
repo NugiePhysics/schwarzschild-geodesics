@@ -1,0 +1,39 @@
+name: Docs PDF
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/derivation.tex
+      - .github/workflows/docs.yml
+  pull_request:
+    paths:
+      - docs/derivation.tex
+      - .github/workflows/docs.yml
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed to attach the PDF to a release
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build derivation.pdf
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: derivation.tex
+          working_directory: docs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: derivation-pdf
+          path: docs/derivation.pdf
+
+      - name: Attach the PDF to the release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: docs/derivation.pdf
